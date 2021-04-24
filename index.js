@@ -91,10 +91,32 @@ const connection = mysql.createConnection({
         message: "Please enter the name of the department you would like to add: "
     })
     .then(answer => {
-        const addName = "INSERT INTO department (name) VALUES ?";
-        connection.query(addName, {departmentName: answer.departmentName}, (err, res) => {
+        const addName = "INSERT INTO department (name) VALUES (?)";
+        const queryDepartments = "SELECT * FROM department";
+        connection.query(addName, answer.departmentName, (err, res) => {
             if (err) throw err;
-            console.log(res);
+            console.log(answer.departmentName, ` has been added to Departments!`);
+            connection.query(queryDepartments, (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                inquirer
+                .prompt({
+                    name: "choice",
+                    type: "list",
+                    message: "What would you like to do next?",
+                    choices: ["Return to main menu", "Add another department", "Exit"]
+                })
+                .then(answer => {
+                    if (answer.choice === "Exit") {
+                        connection.end();
+                        console.log("Exiting Employee Tracker...\nGoodbye!");
+                    } else if (answer.choice === "Return to main menu") {
+                        start();
+                    } else {
+                        addDepartment();
+                    }
+                })  
+            });
         });
     });
   };
