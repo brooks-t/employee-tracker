@@ -9,8 +9,31 @@ const connection = mysql.createConnection({
     database: 'employee_tracker',
   });
 
+  const start = () => {
+      inquirer.prompt(
+          {
+              name: "choice",
+              type: "list",
+              message: "What would you like to do?",
+              choices: ["Add department", "Add roles", "Add employees", "View departments", "View roles", "View employees", "Update employee roles"]
+          }
+      ).then(answer => {
+        console.log(`You chose: `, answer.choice)
+      });
+      connection.end();
+  }
+
+  const afterConnection = () => {
+      connection.query('SELECT * FROM employee', (err, res) => {
+          if (err) throw err;
+          console.table(res);
+          connection.end();
+      })
+  }
+  
   connection.connect((err) => {
       if (err) throw err;
-      console.log("success!")
-      connection.end()
+      console.log(`success! connected as id ${connection.threadId}`);
+      start();
   })
+
