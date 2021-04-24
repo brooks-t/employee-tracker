@@ -90,7 +90,6 @@ const connection = mysql.createConnection({
         type: "input",
         message: "Please enter the name of the department you would like to add: "
     })
-    // TODO: THIS IS BROKEN WITH SYTAX
     .then(answer => {
         const addName = "INSERT INTO department (name) VALUES ?";
         connection.query(addName, {departmentName: answer.departmentName}, (err, res) => {
@@ -128,8 +127,8 @@ const connection = mysql.createConnection({
         })
         .then(answer => {
             if (answer.choice === "Exit") {
-                connection.close();
-                console.log("Goodbye!");
+                connection.end();
+                console.log("Exiting Employee Tracker...\nGoodbye!");
             } else {
                 start();
             }
@@ -141,12 +140,50 @@ const connection = mysql.createConnection({
     console.log("----------------");
     console.log("-- VIEW ROLES --");
     console.log("----------------");
+    connection.query('SELECT * FROM role', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        inquirer
+        .prompt({
+            name: "choice",
+            type: "list",
+            message: "What would you like to do next?",
+            choices: ["Return to main menu", "Exit"]
+        })
+        .then(answer => {
+            if (answer.choice === "Exit") {
+                connection.end();
+                console.log("Exiting Employee Tracker...\nGoodbye!");
+            } else {
+                start();
+            }
+        })  
+    })
   };
 
   const viewEmployees = () => {
     console.log("--------------------");
     console.log("-- VIEW EMPLOYEES --");
     console.log("--------------------");
+    connection.query('SELECT * FROM employee', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        inquirer
+        .prompt({
+            name: "choice",
+            type: "list",
+            message: "What would you like to do next?",
+            choices: ["Return to main menu", "Exit"]
+        })
+        .then(answer => {
+            if (answer.choice === "Exit") {
+                connection.end();
+                console.log("Exiting Employee Tracker...\nGoodbye!");
+            } else {
+                start();
+            }
+        })  
+    })
   };
 
   const updateEmployeeRoles = () => {
