@@ -16,6 +16,9 @@ const connection = mysql.createConnection({
   })
 
   const start = () => {
+      console.log("======================");
+      console.log("== EMPLOYEE TRACKER ==");
+      console.log("======================");
       inquirer
       .prompt(
           {
@@ -64,8 +67,8 @@ const connection = mysql.createConnection({
                 updateEmployeeRoles();
                 break;
             
-            case "Exit": // exits but I also get some wierd error
-                console.log("Goodebye!");
+            case "Exit":
+                console.log("Exiting Employee Tracker...\nGoodebye!");
                 connection.end();
                 break;
             
@@ -88,7 +91,7 @@ const connection = mysql.createConnection({
         message: "Please enter the name of the department you would like to add: "
     })
     // TODO: THIS IS BROKEN WITH SYTAX
-    .then((answer) => {
+    .then(answer => {
         const addName = "INSERT INTO department (name) VALUES ?";
         connection.query(addName, {departmentName: answer.departmentName}, (err, res) => {
             if (err) throw err;
@@ -116,7 +119,21 @@ const connection = mysql.createConnection({
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
         console.table(res);
-        connection.end();
+        inquirer
+        .prompt({
+            name: "choice",
+            type: "list",
+            message: "What would you like to do next?",
+            choices: ["Return to main menu", "Exit"]
+        })
+        .then(answer => {
+            if (answer.choice === "Exit") {
+                connection.close();
+                console.log("Goodbye!");
+            } else {
+                start();
+            }
+        })  
     })
   };
 
