@@ -154,13 +154,25 @@ const connection = mysql.createConnection({
     ])
     .then(answer => {
         console.log(`Adding role:\n`, answer);
-    })
-        /*
-        const addRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+
+        const queryAddRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
         const queryRoles = "SELECT * FROM role";
-        connection.query(addRole, [answer.roleTitle, answer.roleSalary, answer.departmentChoice.id], (err, res) => {
+
+        const getDepartmentId = () => {
+            for (i=0; i < departmentList.length; i++) {
+                if (departmentList[i].name === answer.departmentChoice) {
+                    let matchedId = departmentList[i].id;
+                    console.log(`${answer.departmentChoice} is matched with ${matchedId}`);
+                    return matchedId
+                };
+            };
+        };
+
+        const departmentId = getDepartmentId();
+        
+        connection.query(queryAddRole, [answer.roleTitle, answer.roleSalary, departmentId], (err, res) => {
             if (err) throw err;
-            console.log(`Title: ${answer.roleTitle}\n Salary: ${answer.roleSalary}\n  Department: ${answer.departmentChoice.name}\n has been added to Roles!`);
+            console.log(`Title: ${answer.roleTitle}\nSalary: ${answer.roleSalary}\nDepartment: ${answer.departmentChoice}\n has been added to Roles!`);
             connection.query(queryRoles, (err, res) => {
                 if (err) throw err;
                 console.table(res);
@@ -179,17 +191,18 @@ const connection = mysql.createConnection({
                         start();
                     } else {
                         addRole();
-                    }
+                    };
                 })  
             });
         });
-    });  */
+    });
   };
   
   const addEmployee = () => {
     console.log("------------------");
     console.log("-- ADD EMPLOYEE --");
     console.log("------------------");
+    
   };
 
   const viewDepartments = () => {
