@@ -125,6 +125,65 @@ const connection = mysql.createConnection({
     console.log("--------------");
     console.log("-- ADD ROLE --");
     console.log("--------------");
+    
+    const departmentList = [];
+    
+    connection.query("SELECT * FROM department", (err, res) => {
+        if (err) throw err;
+        res.forEach(({ id, name }) => departmentList.push({id, name}));
+    })
+
+    inquirer
+    .prompt([
+        {
+            name: "roleTitle",
+            type: "input",
+            message: "Please enter the title of the role you would like to add: "
+        },
+        {
+            name: "roleSalary",
+            type: "input",
+            message: "Please enter the salary for role you are adding: "
+        },
+        {
+            name: "departmentChoice",
+            type: "list",
+            message: "Which department would you like to add this role to?",
+            choices: departmentList
+        }
+    ])
+    .then(answer => {
+        console.log(`Adding role:\n`, answer);
+    })
+        /*
+        const addRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+        const queryRoles = "SELECT * FROM role";
+        connection.query(addRole, [answer.roleTitle, answer.roleSalary, answer.departmentChoice.id], (err, res) => {
+            if (err) throw err;
+            console.log(`Title: ${answer.roleTitle}\n Salary: ${answer.roleSalary}\n  Department: ${answer.departmentChoice.name}\n has been added to Roles!`);
+            connection.query(queryRoles, (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                inquirer
+                .prompt({
+                    name: "choice",
+                    type: "list",
+                    message: "What would you like to do next?",
+                    choices: ["Return to main menu", "Add another role", "Exit"]
+                })
+                .then(answer => {
+                    if (answer.choice === "Exit") {
+                        connection.end();
+                        console.log("Exiting Employee Tracker...\nGoodbye!");
+                    } else if (answer.choice === "Return to main menu") {
+                        start();
+                    } else {
+                        addRole();
+                    }
+                })  
+            });
+        });
+    });  */
   };
   
   const addEmployee = () => {
@@ -223,5 +282,4 @@ const connection = mysql.createConnection({
           connection.end();
       })
   }
-
 
