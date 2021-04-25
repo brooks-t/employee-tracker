@@ -196,9 +196,6 @@ const connection = mysql.createConnection({
     ])
     .then(answer => {
 
-        const queryAddRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
-        const queryRoles = "SELECT * FROM role";
-
         const getDepartmentId = () => {
             for (i=0; i < departmentList.length; i++) {
                 if (departmentList[i].name === answer.departmentChoice) {
@@ -209,6 +206,9 @@ const connection = mysql.createConnection({
         };
 
         const departmentId = getDepartmentId();
+
+        const queryAddRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+        const queryRoles = "SELECT title, salary, name AS department FROM role JOIN department ON department_id = department.id;";
         
         connection.query(queryAddRole, [answer.roleTitle, answer.roleSalary, departmentId], (err, res) => {
             if (err) throw err;
@@ -370,7 +370,7 @@ const connection = mysql.createConnection({
     console.log("----------------");
     console.log("-- VIEW ROLES --");
     console.log("----------------");
-    connection.query('SELECT * FROM role', (err, res) => {
+    connection.query('SELECT title, salary, name AS department FROM role JOIN department ON department_id = department.id;', (err, res) => {
         if (err) throw err;
         console.table(res);
         inquirer
