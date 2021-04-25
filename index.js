@@ -278,7 +278,7 @@ const connection = mysql.createConnection({
     ])
     .then(answer => {
         const queryAddEmployee = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
-        const queryEmployee = "SELECT * FROM employee";
+        const queryEmployee = "SELECT employee.id, first_name, last_name, title AS role, manager_id FROM employee JOIN role ON employee.id = role.id;";
 
         const matchRoleId = () => {
             for (i=0; i < roleId.length; i++) {
@@ -395,7 +395,7 @@ const connection = mysql.createConnection({
     console.log("--------------------");
     console.log("-- VIEW EMPLOYEES --");
     console.log("--------------------");
-    connection.query('SELECT * FROM employee', (err, res) => {
+    connection.query('SELECT employee.id, first_name, last_name, title AS role, manager_id FROM employee JOIN role ON employee.id = role.id;', (err, res) => {
         if (err) throw err;
         console.table(res);
         inquirer
@@ -482,7 +482,7 @@ const connection = mysql.createConnection({
             const matchedEmployeeId = matchEmployeeId();
 
             const queryUpdateRole = "UPDATE employee SET ? WHERE ?";
-            const queryUpdatedTable = "SELECT first_name, last_name, title FROM employee JOIN role ON employee.id = role.id";
+            const queryUpdatedTable = "SELECT employee.id, first_name, last_name, title AS role, manager_id FROM employee JOIN role ON employee.id = role.id;";
 
             connection.query(queryUpdateRole, [{role_id: matchedRoleId},{id: matchedEmployeeId}], (err, res) => {
                 if (err) throw err;
