@@ -304,6 +304,18 @@ const connection = mysql.createConnection({
         const managerChoiceIndex = getManagerChoiceIndex();
         console.log(`This is the index of the manager choice: `, managerChoiceIndex);
 
+        const matchManagerId = () => {
+            for(i=0; i < managerId.length; i++) {
+                if (managerChoiceIndex === i) {
+                    let matchedId = managerId[i].id;
+                    console.log(`${managerChoiceIndex} is matched with ${matchedId}`);
+                    return matchedId;
+                }
+            }
+        }
+
+        const matchedManagerId = matchManagerId();
+        console.log(`This is now my matchedManagerId: `, matchedManagerId);
 
         
         connection.end();
