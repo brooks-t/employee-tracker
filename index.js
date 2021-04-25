@@ -1,7 +1,10 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-const roleList =[];
+const roleList = [];
+const roleId = [];
+const managerList = [];
+const managerId = [];
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -21,6 +24,27 @@ const connection = mysql.createConnection({
     connection.query("SELECT * FROM role", (err, res) => {
         if (err) throw err;
         res.forEach(({title}) => roleList.push(title));
+    }) 
+  };
+
+  const getRoleId = async () => {
+    connection.query("SELECT * FROM role", (err, res) => {
+        if (err) throw err;
+        res.forEach(({id, title}) => roleId.push({id, title}));
+    })
+  };
+
+  const getManagerList = async () => {
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if (err) throw err;
+        res.forEach(({first_name, last_name}) => managerList.push(first_name + " " + last_name));
+    }) 
+  };
+
+  const getManagerId = async () => {
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if (err) throw err;
+        res.forEach(({id, first_name, last_name}) => managerId.push({id, first_name, last_name}));
     }) 
   };
 
@@ -213,6 +237,12 @@ const connection = mysql.createConnection({
     console.log("------------------");
 
     await getRoleList();
+
+    await getManagerList();
+
+    await getRoleId();
+
+    await getManagerId();
     
     await inquirer
     .prompt([
@@ -231,10 +261,26 @@ const connection = mysql.createConnection({
             type: "list",
             message: "Please assign a role to your employee",
             choices: roleList
+        },
+        {
+            name: "managerChoice",
+            type: "list",
+            message: "Which manager would you like to assign to this employee?",
+            choices: managerList
         }
     ])
     .then(answer => {
-        console.log(`The employee's name is ${answer.firstName} ${answer.lastName} and their role is ${answer.roleChoice}`);
+        console.log(`The employee's name is ${answer.firstName} ${answer.lastName} and their role is ${answer.roleChoice} and their manager is ${answer.managerChoice}`);
+        
+        console.log(`Here's the roleId array: `, roleId);
+
+        console.log(`Here's the managerId array: `, managerId);
+
+        const queryAddEmployee = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+        const queryEmployee = "SELECT * FROM employee";
+
+        
+        
         connection.end();
     })
   }
