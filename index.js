@@ -433,6 +433,10 @@ const connection = mysql.createConnection({
 
     await getRoleList();
 
+    await getRoleId();
+
+    await getManagerId();
+
     connection.query("SELECT * FROM employee", (err, res) => {
         if (err) throw err;
         res.forEach(({first_name, last_name}) => employeeNames.push(first_name + " " + last_name));
@@ -453,6 +457,44 @@ const connection = mysql.createConnection({
         ])
         .then(answer => {
             console.log(`You chose to update ${answer.employeeChoice}'s role to ${answer.roleUpdate}`);
+            const queryUpdateRole = "UPDATE employee SET role_id = ? WHERE id = ?";
+            const queryUpdatedTable = "SELECT * FROM employee";
+
+            const matchRoleId = () => {
+                for (i=0; i < roleId.length; i++) {
+                    if (roleId[i].title === answer.roleUpdate) {
+                        let matchedId = roleId[i].id;
+                        console.log(`${answer.roleUpdate} is matched with ${matchedId}`);
+                        return matchedId;
+                    }
+                }
+            }
+
+            const matchedRoleId = matchRoleId();
+
+            const getEmployeeChoiceIndex = () => {
+                for (i=0; i < employeeNames.length; i++) {
+                    if (answer.employeeChoice === employeeNames[i]) {
+                        let employeeIndex = i;
+                        return employeeIndex;
+                    }
+    
+                }
+            }
+            const employeeChoiceIndex = getEmployeeChoiceIndex();
+
+            const matchEmployeeId = () => {
+                for(i=0; i < managerId.length; i++) {
+                    if (employeeChoiceIndex === i) {
+                        let matchedId = managerId[i].id;
+                        console.log(`${employeeChoiceIndex} is matched with ${matchedId}`);
+                        return matchedId;
+                    }
+                }
+            }
+            const matchedEmployeeId = matchEmployeeId();
+
+
         })
     }) 
 
