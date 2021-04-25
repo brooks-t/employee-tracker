@@ -5,6 +5,8 @@ const roleList = [];
 const roleId = [];
 const managerList = [];
 const managerId = [];
+const employeeList = [];
+
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -38,6 +40,15 @@ const connection = mysql.createConnection({
     connection.query("SELECT * FROM employee", (err, res) => {
         if (err) throw err;
         res.forEach(({first_name, last_name}) => managerList.push(first_name + " " + last_name));
+        console.log(managerList);
+    }) 
+  };
+
+  const getEmployeeList = async () => {
+    connection.query("SELECT employee.id, first_name, last_name, title FROM employee JOIN role ON employee.role_id = role.id;", (err, res) => {
+        if (err) throw err;
+        res.forEach(({id, first_name, last_name, title}) => employeeList.push({id, first_name, last_name, title}));
+        console.log(`This is the employee list: `, employeeList);
     }) 
   };
 
@@ -413,10 +424,38 @@ const connection = mysql.createConnection({
     })
   };
 
-  const updateEmployeeRoles = () => {
+  const updateEmployeeRoles = async () => {
     console.log("-------------------------");
     console.log("-- UPDATE EMPLOYEE ROLES --");
     console.log("-------------------------");
+
+    const employeeNames = [];
+
+    await getRoleList();
+
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if (err) throw err;
+        res.forEach(({first_name, last_name}) => employeeNames.push(first_name + " " + last_name));
+        inquirer
+        .prompt([
+            {
+                name: "employeeChoice",
+                type: "list",
+                message: "Which employee's role would you like to update?",
+                choices: employeeNames
+            },
+            {
+                name: "roleUpdate",
+                type: "list",
+                message: "Which role would you like to assign them?",
+                choices: roleList
+            }
+        ])
+        .then(answer => {
+            console.log(`You chose to update ${answer.employeeChoice}'s role to ${answer.roleUpdate}`);
+        })
+    }) 
+
   };
 
 
