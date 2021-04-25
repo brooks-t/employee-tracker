@@ -292,6 +292,18 @@ const connection = mysql.createConnection({
         const matchedRoleId = matchRoleId();
         console.log(`This is now my matchedRoleId: `, matchedRoleId);
 
+        const getManagerChoiceIndex = () => {
+            for (i=0; i < managerList.length; i++) {
+                if (answer.managerChoice === managerList[i]) {
+                    let managerIndex = i;
+                    return managerIndex;
+                }
+
+            }
+        }
+        const managerChoiceIndex = getManagerChoiceIndex();
+        console.log(`This is the index of the manager choice: `, managerChoiceIndex);
+
 
         
         connection.end();
