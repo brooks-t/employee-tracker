@@ -271,10 +271,6 @@ const connection = mysql.createConnection({
     ])
     .then(answer => {
         console.log(`The employee's name is ${answer.firstName} ${answer.lastName} and their role is ${answer.roleChoice} and their manager is ${answer.managerChoice}`);
-        
-        console.log(`Here's the roleId array: `, roleId);
-
-        console.log(`Here's the managerId array: `, managerId);
 
         const queryAddEmployee = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
         const queryEmployee = "SELECT * FROM employee";
@@ -290,7 +286,6 @@ const connection = mysql.createConnection({
         }
 
         const matchedRoleId = matchRoleId();
-        console.log(`This is now my matchedRoleId: `, matchedRoleId);
 
         const getManagerChoiceIndex = () => {
             for (i=0; i < managerList.length; i++) {
@@ -302,7 +297,6 @@ const connection = mysql.createConnection({
             }
         }
         const managerChoiceIndex = getManagerChoiceIndex();
-        console.log(`This is the index of the manager choice: `, managerChoiceIndex);
 
         const matchManagerId = () => {
             for(i=0; i < managerId.length; i++) {
@@ -315,10 +309,32 @@ const connection = mysql.createConnection({
         }
 
         const matchedManagerId = matchManagerId();
-        console.log(`This is now my matchedManagerId: `, matchedManagerId);
 
-        
-        connection.end();
+        connection.query(queryAddEmployee, [answer.firstName, answer.lastName, matchedRoleId, matchedManagerId], (err, res) => {
+            if (err) throw err;
+            console.log(`${answer.firstName} ${answer.lastName} has been given the role of ${answer.roleChoice} and has been assigned manager ${answer.managerChoice}. Adding to database....`);
+            connection.query(queryEmployee, (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                inquirer
+                .prompt({
+                    name: "choice",
+                    type: "list",
+                    message: "What would you like to do next?",
+                    choices: ["Return to main menu", "Add another employee", "Exit"]
+                })
+                .then(answer => {
+                    if (answer.choice === "Exit") {
+                        connection.end();
+                        console.log("Exiting Employee Tracker...\nGoodbye!");
+                    } else if (answer.choice === "Return to main menu") {
+                        start();
+                    } else {
+                        addEmployee();
+                    }
+                })
+            })
+        })
     })
   }
 
