@@ -279,7 +279,20 @@ const connection = mysql.createConnection({
         const queryAddEmployee = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
         const queryEmployee = "SELECT * FROM employee";
 
-        
+        const matchRoleId = () => {
+            for (i=0; i < roleId.length; i++) {
+                if (roleId[i].title === answer.roleChoice) {
+                    let matchedId = roleId[i].id;
+                    console.log(`${answer.roleChoice} is matched with ${matchedId}`);
+                    return matchedId;
+                }
+            }
+        }
+
+        const matchedRoleId = matchRoleId();
+        console.log(`This is now my matchedRoleId: `, matchedRoleId);
+
+
         
         connection.end();
     })
