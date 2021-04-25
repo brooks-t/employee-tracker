@@ -1,6 +1,8 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
+const roleList =[];
+
 const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
@@ -14,6 +16,13 @@ const connection = mysql.createConnection({
     console.log(`success! connected as id ${connection.threadId}`);
     start();
   })
+
+  const getRoleList = async () => {
+    connection.query("SELECT * FROM role", (err, res) => {
+        if (err) throw err;
+        res.forEach(({title}) => roleList.push(title));
+    }) 
+  };
 
   const start = () => {
       console.log("======================");
@@ -198,12 +207,37 @@ const connection = mysql.createConnection({
     });
   };
   
-  const addEmployee = () => {
+  const addEmployee = async () => { 
     console.log("------------------");
     console.log("-- ADD EMPLOYEE --");
     console.log("------------------");
+
+    await getRoleList();
     
-  };
+    await inquirer
+    .prompt([
+        {
+            name: "firstName",
+            type: "input",
+            message: "Please enter the first name of this employee: "
+        },
+        {
+            name: "lastName",
+            type: "input",
+            message: "Please enter the last name of this employee"
+        },
+        {
+            name: "roleChoice",
+            type: "list",
+            message: "Please assign a role to your employee",
+            choices: roleList
+        }
+    ])
+    .then(answer => {
+        console.log(`The employee's name is ${answer.firstName} ${answer.lastName} and their role is ${answer.roleChoice}`);
+        connection.end();
+    })
+  }
 
   const viewDepartments = () => {
     console.log("----------------------");
@@ -294,5 +328,5 @@ const connection = mysql.createConnection({
           console.table(res);
           connection.end();
       })
-  }
+  };
 
