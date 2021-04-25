@@ -40,7 +40,6 @@ const connection = mysql.createConnection({
     connection.query("SELECT * FROM employee", (err, res) => {
         if (err) throw err;
         res.forEach(({first_name, last_name}) => managerList.push(first_name + " " + last_name));
-        console.log(managerList);
     }) 
   };
 
@@ -48,7 +47,6 @@ const connection = mysql.createConnection({
     connection.query("SELECT employee.id, first_name, last_name, title FROM employee JOIN role ON employee.role_id = role.id;", (err, res) => {
         if (err) throw err;
         res.forEach(({id, first_name, last_name, title}) => employeeList.push({id, first_name, last_name, title}));
-        console.log(`This is the employee list: `, employeeList);
     }) 
   };
 
@@ -197,7 +195,6 @@ const connection = mysql.createConnection({
         }
     ])
     .then(answer => {
-        console.log(`Adding role:\n`, answer);
 
         const queryAddRole = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
         const queryRoles = "SELECT * FROM role";
@@ -206,7 +203,6 @@ const connection = mysql.createConnection({
             for (i=0; i < departmentList.length; i++) {
                 if (departmentList[i].name === answer.departmentChoice) {
                     let matchedId = departmentList[i].id;
-                    console.log(`${answer.departmentChoice} is matched with ${matchedId}`);
                     return matchedId
                 };
             };
@@ -281,8 +277,6 @@ const connection = mysql.createConnection({
         }
     ])
     .then(answer => {
-        console.log(`The employee's name is ${answer.firstName} ${answer.lastName} and their role is ${answer.roleChoice} and their manager is ${answer.managerChoice}`);
-
         const queryAddEmployee = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
         const queryEmployee = "SELECT * FROM employee";
 
@@ -290,7 +284,6 @@ const connection = mysql.createConnection({
             for (i=0; i < roleId.length; i++) {
                 if (roleId[i].title === answer.roleChoice) {
                     let matchedId = roleId[i].id;
-                    console.log(`${answer.roleChoice} is matched with ${matchedId}`);
                     return matchedId;
                 }
             }
@@ -313,7 +306,6 @@ const connection = mysql.createConnection({
             for(i=0; i < managerId.length; i++) {
                 if (managerChoiceIndex === i) {
                     let matchedId = managerId[i].id;
-                    console.log(`${managerChoiceIndex} is matched with ${matchedId}`);
                     return matchedId;
                 }
             }
@@ -456,15 +448,11 @@ const connection = mysql.createConnection({
             }
         ])
         .then(answer => {
-            console.log(`You chose to update ${answer.employeeChoice}'s role to ${answer.roleUpdate}`);
-            const queryUpdateRole = "UPDATE employee SET role_id = ? WHERE id = ?";
-            const queryUpdatedTable = "SELECT * FROM employee";
 
             const matchRoleId = () => {
                 for (i=0; i < roleId.length; i++) {
                     if (roleId[i].title === answer.roleUpdate) {
                         let matchedId = roleId[i].id;
-                        console.log(`${answer.roleUpdate} is matched with ${matchedId}`);
                         return matchedId;
                     }
                 }
@@ -487,26 +475,40 @@ const connection = mysql.createConnection({
                 for(i=0; i < managerId.length; i++) {
                     if (employeeChoiceIndex === i) {
                         let matchedId = managerId[i].id;
-                        console.log(`${employeeChoiceIndex} is matched with ${matchedId}`);
                         return matchedId;
                     }
                 }
             }
             const matchedEmployeeId = matchEmployeeId();
 
+            const queryUpdateRole = "UPDATE employee SET ? WHERE ?";
+            const queryUpdatedTable = "SELECT first_name, last_name, title FROM employee JOIN role ON employee.id = role.id";
 
+            connection.query(queryUpdateRole, [{role_id: matchedRoleId},{id: matchedEmployeeId}], (err, res) => {
+                if (err) throw err;
+                console.log(`${answer.employeeChoice} with an id of ${matchedEmployeeId} has had their role updated to ${answer.roleUpdate} which has a role id of ${matchedRoleId}. Adding to database...`);
+                connection.query(queryUpdatedTable, (err, res) => {
+                    if (err) throw err;
+                    console.table(res);
+                    inquirer
+                    .prompt({
+                        name: "choice",
+                        type: "list",
+                        message: "What would you like to do next?",
+                        choices: ["Return to main menu", "Update another employee's role", "Exit"]
+                    })
+                    .then(answer => {
+                        if (answer.choice === "Exit") {
+                            connection.end();
+                            console.log("Exiting Employee Tracker...\nGoodbye!");
+                        } else if (answer.choice === "Return to main menu") {
+                            start();
+                        } else {
+                            updateEmployeeRoles();
+                        }
+                    })
+                })
+            })
         })
-    }) 
-
+    })
   };
-
-
-
-  const afterConnection = () => {
-      connection.query('SELECT * FROM employee', (err, res) => {
-          if (err) throw err;
-          console.table(res);
-          connection.end();
-      })
-  };
-
